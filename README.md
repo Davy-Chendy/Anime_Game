@@ -6,5 +6,5 @@
 
 ## 项目流程图
 
-![image-20240720185114349](https://davychen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/image-20240720185114349.png)
+![image-20240720193240857](https://davychen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/image-20240720193240857.png)
 
