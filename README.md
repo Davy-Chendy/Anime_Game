@@ -92,5 +92,6 @@ Bangumi中，我们通过年份，爬取了各个年份番剧的信息，一并�
 
 
 ## 贡献者
-<!-- readme: collaborators,contributors -start -->
-<!-- readme: collaborators,contributors -end -->
+<a href="https://github.com/Davy-Chendy/Anime_Game/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Davy-Chendy/Anime_Game" />
+</a>
