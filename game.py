@@ -1,7 +1,6 @@
 import os
 import random
 from PIL import Image, ImageFilter, ImageOps, ImageTk
-from image_currptions import apply_gaussian_blur, apply_mosaic, apply_color_inversion, apply_visible_squares
 import tkinter as tk
 from tkinter import filedialog
 
@@ -16,6 +15,54 @@ def load_images_from_folder(folder):
                 if img is not None:
                     images.append((img_path, img))
     return images
+
+# 高斯模糊
+def apply_gaussian_blur(img, level):
+    radius = level * 5  # 损坏程度越高，模糊半径越大
+    return img.filter(ImageFilter.GaussianBlur(radius))
+
+# 马赛克
+def apply_mosaic(img, level):
+    corrupt_level = 6-level
+    pixel_size = max(1, int(max(img.size) / (corrupt_level * 10)))  # 损坏程度越高，马赛克越小，范围从1到较大值
+    width, height = img.size
+    mosaic_img = Image.new('RGB', (width, height))
+
+    for y in range(0, height, pixel_size):
+        for x in range(0, width, pixel_size):
+            crop = img.crop((x, y, x + pixel_size, y + pixel_size))
+            avg_color = crop.resize((1, 1)).resize((pixel_size, pixel_size))
+            mosaic_img.paste(avg_color, (x, y))
+
+    return mosaic_img
+
+# 颜色反转
+def apply_color_inversion(img):
+    return ImageOps.invert(img.convert('RGB'))
+
+# 漏方形区域
+def apply_visible_squares(img, level, used_regions):
+    width, height = img.size
+    visible_img = Image.new('RGB', (width, height), (0, 0, 0))
+    num_squares = 6 - level  # 损坏程度越高，展示的区域越少
+    square_size = (width // 10, height // 10)  # 固定方形区域大小
+
+    for i in range(num_squares):
+        while True:
+            top_left_x = random.randint(0, width - square_size[0])
+            top_left_y = random.randint(0, height - square_size[1])
+            region_coords = (top_left_x, top_left_y, top_left_x + square_size[0], top_left_y + square_size[1])
+            if region_coords not in used_regions:
+                used_regions.add(region_coords)
+                region = img.crop(region_coords)
+                visible_img.paste(region, (top_left_x, top_left_y))
+                break
+
+    for region_coords in used_regions:
+        region = img.crop(region_coords)
+        visible_img.paste(region, region_coords[:2])
+
+    return visible_img
 
 # 随机选择损坏类型并应用
 def apply_random_damage(img, damage_type, level, used_regions):
@@ -71,7 +118,7 @@ def load_next_image():
     global current_damage_level, current_image_name, current_image_path, current_image_index, images, damage_type, used_regions
     current_image_path, img = images[current_image_index]
     current_image_name = os.path.basename(current_image_path)
-    current_damage_level = 3
+    current_damage_level = 5
     damage_type = random.choice(['gaussian_blur', 'mosaic', 'color_inversion', 'visible_squares'])
     used_regions = set()
     update_image(img, damage_type, current_damage_level, used_regions)
@@ -79,15 +126,15 @@ def load_next_image():
 # 主函数
 if __name__ == "__main__":
     root = tk.Tk()
-    root.title("动漫高手")
+    root.title("损坏图片猜测游戏")
     root.geometry("600x650")
 
-    folder = filedialog.askdirectory(title="pic")
+    folder = filedialog.askdirectory(title="选择图片文件夹")
     images = load_images_from_folder(folder)
     random.shuffle(images)
 
     current_image_index = 0
-    current_damage_level = 3 # 当前图片破坏程度
+    current_damage_level = 5
     current_image_name = ""
     current_image_path = ""
     damage_type = ""
